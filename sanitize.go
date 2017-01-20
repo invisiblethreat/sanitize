@@ -3,7 +3,6 @@ package sanitize
 
 import (
 	"bytes"
-	"html"
 	"html/template"
 	"io"
 	"path"
@@ -97,11 +96,19 @@ func HTMLAllowing(s string, args ...[]string) (string, error) {
 
 }
 
-// HTML strips html tags, replace common entities, and escapes <>&;'" in the result.
-// Note the returned text may contain entities as it is escaped by HTMLEscapeString, and most entities are not translated.
+// HTML removes line breaks, the default of html()
 func HTML(s string) string {
+	return html(s, true)
+}
 
-	output := ""
+// HTMLBreaks keeps line breaks intact
+func HTMLBreaks(s string) string {
+	return html(s, false)
+}
+
+// html strips html tags, replace common entities, and escapes <>&;'" in the result.
+// Note the returned text may contain entities as it is escaped by HTMLEscapeString, and most entities are not translated.
+func html(s string, removeBreaks bool) (output string) {
 
 	// Shortcut strings with no tags in them
 	if !strings.ContainsAny(s, "<>") {
@@ -110,7 +117,9 @@ func HTML(s string) string {
 
 		// First remove line breaks etc as these have no meaning outside html tags (except pre)
 		// this means pre sections will lose formatting... but will result in less unintentional paras.
-		s = strings.Replace(s, "\n", "", -1)
+		if removeBreaks {
+			s = strings.Replace(s, "\n", "", -1)
+		}
 
 		// Then replace line breaks with newlines, to preserve that formatting
 		s = strings.Replace(s, "</p>", "\n", -1)
