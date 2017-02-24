@@ -3,6 +3,7 @@ package sanitize
 
 import (
 	"bytes"
+	"html"
 	"html/template"
 	"io"
 	"path"
@@ -98,17 +99,17 @@ func HTMLAllowing(s string, args ...[]string) (string, error) {
 
 // HTML removes line breaks, the default of html()
 func HTML(s string) string {
-	return html(s, true)
+	return htmlClean(s, true)
 }
 
 // HTMLBreaks keeps line breaks intact
 func HTMLBreaks(s string) string {
-	return html(s, false)
+	return htmlClean(s, false)
 }
 
 // html strips html tags, replace common entities, and escapes <>&;'" in the result.
 // Note the returned text may contain entities as it is escaped by HTMLEscapeString, and most entities are not translated.
-func html(s string, removeBreaks bool) (output string) {
+func htmlClean(s string, removeBreaks bool) (output string) {
 
 	// Shortcut strings with no tags in them
 	if !strings.ContainsAny(s, "<>") {
